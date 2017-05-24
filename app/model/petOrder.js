@@ -5,7 +5,7 @@
 var mongoose = require("mongoose");	//	顶会议用户组件
 var Schema = mongoose.Schema;	//	创建模型
 var orderScheMa = new Schema({
-    orderUser:String,
+    //orderUser:String,
     orderTel:String,
     receiveUser:String,
     receiveTel:String,

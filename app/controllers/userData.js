@@ -14,6 +14,7 @@ router.route('/userlist')
             var pipeline = [
                 {
                     $project:{
+                        username:1,
                         telno:1,
                         password:1
                     }
@@ -21,22 +22,14 @@ router.route('/userlist')
             ]
 
             return {module:userModel,pipeline:pipeline,pushObj:{
+                username: '$username',
                 telno: '$telno',
                 password:'$password'
             }};
         })
     })
     .post(function (req,res) {
-        // var username = req.body.username;
-        // var password = req.body.password;
-        // var newObj = {
-        //     username:username,
-        //     password:password
-        // }
-        //
-        // userModel.findOneAndUpdate({username:username},{$set:newObj},{upsert:true}).then(function (result) {
-        //     res.json('success')
-        // })
+
         utilProc.ProcPostReq(req, res, false, utilProc.defultAuthOrg, function (targetObj) {
             if (targetObj.action==='del'){
                 return userModel.remove({telno:targetObj.thisid})
@@ -44,13 +37,28 @@ router.route('/userlist')
             else {
                 var newObj = {
                     telno:targetObj.value.telno,
-                    password:targetObj.value.password
+                    password:targetObj.value.password,
+                    username:targetObj.value.username
                 }
 
-                var pipeline = {
+                var pipeline = [{
                     $match:{
                         telno:targetObj.value.telno
                     }
+                }]
+
+                if (targetObj.action==='edit'){
+                    pipeline.push({
+                        $project:{
+                            telno:1,
+                            isOld:{$eq:[targetObj.value.telno,targetObj.thisid]}
+                        }
+                    })
+                    pipeline.push({
+                        $match:{
+                            "isOld":false
+                        }
+                    })
                 }
 
                 return userModel.aggregate(pipeline).exec().then(function (results) {
@@ -80,32 +88,6 @@ router.route('/checkuser')
                 $match:{
                     telno:telno
                 }
-            },
-            {
-                $lookup:{
-                    "from" : "petshopmodels",
-                    "localField" : "telno",
-                    "foreignField" : "user.useraccount",
-                    "as" : "userinfo"
-                }
-            },
-            {
-                $unwind:'$userinfo'
-            },
-            {
-                $project:{
-                    telno:1,
-                    password:1,
-                    uservalue:'$userinfo.user'
-                }
-            },
-            {
-                $unwind:'$uservalue'
-            },
-            {
-                $match:{
-                    'uservalue.useraccount':telno
-                }
             }
         ]
 
@@ -123,6 +105,35 @@ router.route('/checkuser')
             }
         })
 
+    })
+
+router.route('/checkreg')
+    .post(function (req,res) {
+        utilProc.ProcPostReq(req, res, false, utilProc.defultAuthOrg,
+            function (targetObj) {
+                var newObject = {
+                    username:targetObj.value.username,
+                    telno:targetObj.value.telno,
+                    password:targetObj.value.password
+                }
+
+                var pipeline = [
+                    {
+                        $match:{
+                            telno:targetObj.value.telno
+                        }
+                    }
+                ]
+
+                return userModel.aggregate(pipeline).exec().then(function (results) {
+                    if (results.length>0){
+                        return Q.reject('已存在该用户')
+                    }
+                    else {
+                        return userModel.create(newObject)
+                    }
+                })
+            })
     })
 
 module.exports = router;

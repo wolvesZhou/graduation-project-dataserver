@@ -18,6 +18,7 @@ var kindData = require('./app/controllers/kindData');
 var requestData = require('./app/controllers/requestData')
 var adviceData = require('./app/controllers/adviceData')
 var orderData = require('./app/controllers/petOrderData')
+var manageData = require('./app/controllers/manageData');
 
 var bodyParser = require('body-parser');
 //var ejs = require('ejs')
@@ -41,6 +42,7 @@ app.use('/kindInfo',kindData);
 app.use('/request',requestData);
 app.use('/advice',adviceData)
 app.use('/petOrder',orderData)
+app.use('/manageInfo',manageData)
 
 
 mongoose.connect('mongodb://localhost:27017/admin', function (err, db) {
