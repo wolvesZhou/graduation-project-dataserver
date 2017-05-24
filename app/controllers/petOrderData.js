@@ -16,7 +16,7 @@ router.route('/orderlist')
                 {
                     $project:{
                         _id:1,
-
+                        orderUser:1,
                         orderTel:1,
                         receiveUser:1,
                         receiveTel:1,
@@ -32,7 +32,7 @@ router.route('/orderlist')
 
             return {module:orderModel,pipeline:pipeline,pushObj:{
                 _id:'$_id',
-
+                orderUser:'$orderUser',
                 orderTel:'$orderTel',
                 receiveUser:'$receiveUser',
                 receiveTel:'$receiveTel',
@@ -49,7 +49,7 @@ router.route('/orderlist')
         utilProc.ProcPostReq(req, res, false, utilProc.defultAuthOrg,
             function (targetObj) {
                 var newObject = {
-                    //orderUser:targetObj.value.orderUser,
+                    orderUser:targetObj.value.orderUser,
                     orderTel:targetObj.value.orderTel,
                     receiveUser:targetObj.value.receiveUser,
                     receiveTel:targetObj.value.receiveTel,
@@ -70,11 +70,11 @@ router.route('/changeorder')
     .post(function (req,res) {
         utilProc.ProcPostReq(req, res, false, utilProc.defultAuthOrg, function (targetObj) {
             if (targetObj.action==='del'){
-                return adviceModel.remove({_id:targetObj.thisid})
+                return orderModel.remove({_id:targetObj.thisid})
             }
             else {
                 var newObject = {
-                    //orderUser:targetObj.value.orderUser,
+                    orderUser:targetObj.value.orderUser,
                     orderTel:targetObj.value.orderTel,
                     receiveUser:targetObj.value.receiveUser,
                     receiveTel:targetObj.value.receiveTel,
